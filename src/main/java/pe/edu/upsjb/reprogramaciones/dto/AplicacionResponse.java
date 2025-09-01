@@ -11,7 +11,8 @@ public class AplicacionResponse {
     private Boolean correoDocente;
     private Boolean correoAlumno;
     private Boolean correoDOA;
-    private Boolean correoCoordinador;
+    private Boolean correoCoordinadorPrograma;
+    private Boolean correoCoordinadorAmbiente;
 
 
     public int getLimiteReprogramaciones() {
@@ -54,12 +55,20 @@ public class AplicacionResponse {
         this.correoDOA = correoDOA;
     }
 
-    public Boolean getCorreoCoordinador() {
-        return correoCoordinador;
+    public Boolean getCorreoCoordinadorPrograma() {
+        return correoCoordinadorPrograma;
     }
 
-    public void setCorreoCoordinador(Boolean correoCoordinador) {
-        this.correoCoordinador = correoCoordinador;
+    public void setCorreoCoordinadorPrograma(Boolean correoCoordinadorPrograma) {
+        this.correoCoordinadorPrograma = correoCoordinadorPrograma;
+    }
+
+    public Boolean getCorreoCoordinadorAmbiente() {
+        return correoCoordinadorAmbiente;
+    }
+
+    public void setCorreoCoordinadorAmbiente(Boolean correoCoordinadorAmbiente) {
+        this.correoCoordinadorAmbiente = correoCoordinadorAmbiente;
     }
 
 

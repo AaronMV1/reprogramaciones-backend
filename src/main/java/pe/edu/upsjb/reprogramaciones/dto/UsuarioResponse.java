@@ -8,8 +8,9 @@ public class UsuarioResponse {
 
     private String nombres;
     private String apellidos;
-    private String perfil;
     private String correo;
+    private String perfil;
+    private String programa;
     private Boolean activo;
     private String usuarioResponsable;
 
@@ -30,6 +31,14 @@ public class UsuarioResponse {
         this.apellidos = apellidos;
     }
 
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
     public String getPerfil() {
         return perfil;
     }
@@ -38,12 +47,12 @@ public class UsuarioResponse {
         this.perfil = perfil;
     }
 
-    public String getCorreo() {
-        return correo;
+    public String getPrograma() {
+        return programa;
     }
 
-    public void setCorreo(String correo) {
-        this.correo = correo;
+    public void setPrograma(String programa) {
+        this.programa = programa;
     }
 
     public Boolean getActivo() {

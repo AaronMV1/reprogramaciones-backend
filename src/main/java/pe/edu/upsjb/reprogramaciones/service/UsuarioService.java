@@ -9,6 +9,7 @@ import pe.edu.upsjb.reprogramaciones.dto.*;
 public interface UsuarioService {
 
 
+    public ListaUsuarioResponse loginConsultarUsuario(UsuarioRequest request);
     public ListaUsuarioResponse consultarUsuario(UsuarioRequest request);
     public ListaUsuarioResponse consultarListaUsuarios();
 

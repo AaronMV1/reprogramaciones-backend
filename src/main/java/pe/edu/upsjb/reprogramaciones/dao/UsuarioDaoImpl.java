@@ -28,6 +28,51 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
     private JdbcTemplate jdbcTemplate;
 
 
+    public ListaUsuarioResponse loginConsultarUsuario(UsuarioRequest request) {
+
+        ListaUsuarioResponse response = new ListaUsuarioResponse();
+        response.setLista(new ArrayList<>());
+
+        try {
+
+            Connection con = getConnection();
+
+            PreparedStatement psSelect = con.prepareStatement(
+                    " SELECT nombres, apellidos, correo, perfil, programa, activo, usuario_responsable " +
+                            " FROM reprogramaciones.usuario " +
+                            " WHERE LOWER(correo) = LOWER(?) AND activo = true"
+            );
+
+            psSelect.setString(1, request.getCorreo());
+            ResultSet rs = psSelect.executeQuery();
+
+            while (rs.next()) {
+                UsuarioResponse dto = new UsuarioResponse();
+                dto.setNombres(rs.getString("nombres"));
+                dto.setApellidos(rs.getString("apellidos"));
+                dto.setCorreo(rs.getString("correo"));
+                dto.setPerfil(rs.getString("perfil"));
+                dto.setPrograma(rs.getString("programa"));
+                dto.setActivo(rs.getBoolean("activo"));
+                dto.setUsuarioResponsable(rs.getString("usuario_responsable"));
+                response.getLista().add(dto);
+            }
+
+            psSelect.close();
+            rs.close();
+
+            con.close();
+
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(e);
+
+        }
+
+        return response;
+
+    }
     public ListaUsuarioResponse consultarUsuario(UsuarioRequest request) {
 
         ListaUsuarioResponse response = new ListaUsuarioResponse();
@@ -38,7 +83,7 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
             Connection con = getConnection();
 
             PreparedStatement psSelect = con.prepareStatement(
-             " SELECT nombres, apellidos, perfil, correo, activo, usuario_responsable " +
+             " SELECT nombres, apellidos, correo, perfil, programa, activo, usuario_responsable " +
                  " FROM reprogramaciones.usuario " +
                  " WHERE LOWER(correo) = LOWER(?) AND activo = true"
             );
@@ -50,8 +95,9 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
                 UsuarioResponse dto = new UsuarioResponse();
                 dto.setNombres(rs.getString("nombres"));
                 dto.setApellidos(rs.getString("apellidos"));
-                dto.setPerfil(rs.getString("perfil"));
                 dto.setCorreo(rs.getString("correo"));
+                dto.setPerfil(rs.getString("perfil"));
+                dto.setPrograma(rs.getString("programa"));
                 dto.setActivo(rs.getBoolean("activo"));
                 dto.setUsuarioResponsable(rs.getString("usuario_responsable"));
                 response.getLista().add(dto);
@@ -82,7 +128,7 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
             Connection con = getConnection();
 
             PreparedStatement psSelect = con.prepareStatement(
-            " SELECT nombres, apellidos, perfil, correo, activo, usuario_responsable " +
+            " SELECT nombres, apellidos, correo, perfil, programa, activo, usuario_responsable " +
                 " FROM reprogramaciones.usuario " +
                 " WHERE activo = true "
             );
@@ -93,8 +139,9 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
                 UsuarioResponse dto = new UsuarioResponse();
                 dto.setNombres(rs.getString("nombres"));
                 dto.setApellidos(rs.getString("apellidos"));
-                dto.setPerfil(rs.getString("perfil"));
                 dto.setCorreo(rs.getString("correo"));
+                dto.setPerfil(rs.getString("perfil"));
+                dto.setPrograma(rs.getString("programa"));
                 dto.setActivo(rs.getBoolean("activo"));
                 dto.setUsuarioResponsable(rs.getString("usuario_responsable"));
                 response.getLista().add(dto);
@@ -165,15 +212,17 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
 
                         PreparedStatement psInsert = con.prepareStatement(
                                 " UPDATE reprogramaciones.usuario " +
-                                        " SET nombres = ?, apellidos = ?, perfil = ?, activo = ? " +
+                                        " SET nombres = ?, apellidos = ?, perfil = ?, programa = ?, activo = ? " +
                                         " WHERE LOWER(correo) = LOWER(?)"
                         );
 
                         psInsert.setString(1, request.getNombres());
                         psInsert.setString(2, request.getApellidos());
+                        psInsert.setString(6, request.getCorreo());
                         psInsert.setString(3, request.getPerfil());
-                        psInsert.setBoolean(4, true);
-                        psInsert.setString(5, request.getCorreo());
+                        psInsert.setString(4, request.getPrograma());
+                        psInsert.setBoolean(5, true);
+
                         psInsert.executeUpdate();
                         psInsert.close();
 
@@ -188,16 +237,17 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
 
                 PreparedStatement psInsert = con.prepareStatement(
                     " INSERT INTO reprogramaciones.usuario " +
-                        " (nombres, apellidos, perfil, correo, activo, usuario_responsable) " +
-                        " VALUES (?, ?, ?, ?, ?, ?)"
+                        " (nombres, apellidos, correo, perfil, programa, activo, usuario_responsable) " +
+                        " VALUES (?, ?, ?, ?, ?, ?, ?)"
                 );
 
                 psInsert.setString(1, request.getNombres());
                 psInsert.setString(2, request.getApellidos());
-                psInsert.setString(3, request.getPerfil());
-                psInsert.setString(4, request.getCorreo());
-                psInsert.setBoolean(5, true);
-                psInsert.setString(6, request.getUsuarioResponsable());
+                psInsert.setString(3, request.getCorreo());
+                psInsert.setString(4, request.getPerfil());
+                psInsert.setString(5, request.getPrograma());
+                psInsert.setBoolean(6, true);
+                psInsert.setString(7, request.getUsuarioResponsable());
                 psInsert.executeUpdate();
 
                 psInsert.close();
@@ -246,14 +296,15 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
 
                 PreparedStatement psUpdate = con.prepareStatement(
                         " UPDATE reprogramaciones.usuario " +
-                                " SET nombres = ?, apellidos = ?, perfil = ? " +
+                                " SET nombres = ?, apellidos = ?, perfil = ?, programa = ? " +
                                 " WHERE LOWER(correo) = LOWER(?)"
                 );
 
                 psUpdate.setString(1, request.getNombres());
                 psUpdate.setString(2, request.getApellidos());
+                psUpdate.setString(5, request.getCorreo());
                 psUpdate.setString(3, request.getPerfil());
-                psUpdate.setString(4, request.getCorreo());
+                psUpdate.setString(4, request.getPrograma());
                 psUpdate.executeUpdate();
 
                 psUpdate.close();

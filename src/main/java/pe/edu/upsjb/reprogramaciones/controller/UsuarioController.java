@@ -24,6 +24,11 @@ public class UsuarioController {
     UsuarioService usuarioService;
 
 
+    @PostMapping (value = "/login-consultar-usuario")
+    public @ResponseBody ListaUsuarioResponse loginConsultarUsuario(@RequestBody UsuarioRequest request) {
+        return usuarioService.loginConsultarUsuario(request);
+    }
+
     @PostMapping (value = "/consultar-usuario")
     public @ResponseBody ListaUsuarioResponse consultarUsuario(@RequestBody UsuarioRequest request) {
         return usuarioService.consultarUsuario(request);

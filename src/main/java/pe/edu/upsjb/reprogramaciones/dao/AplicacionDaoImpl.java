@@ -50,7 +50,8 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
                 dto.setCorreoDocente(rs.getBoolean("cdocente"));
                 dto.setCorreoAlumno(rs.getBoolean("calumno"));
                 dto.setCorreoDOA(rs.getBoolean("cdoa"));
-                dto.setCorreoCoordinador(rs.getBoolean("ccoordinador"));
+                dto.setCorreoCoordinadorPrograma(rs.getBoolean("ccoordinador_programa"));
+                dto.setCorreoCoordinadorAmbiente(rs.getBoolean("ccoordinador_ambiente"));
                 response.getLista().add(dto);
             }
 
@@ -77,7 +78,7 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
 
             PreparedStatement psUpdate = con.prepareStatement(
                     " UPDATE reprogramaciones.configuracion " +
-                            " SET limite = ?, plazo = ?, cdocente = ?, calumno = ?, cdoa = ?, ccoordinador = ? "
+                            " SET limite = ?, plazo = ?, cdocente = ?, calumno = ?, cdoa = ?, ccoordinador_programa = ?, ccoordinador_ambiente = ? "
             );
 
             psUpdate.setInt(1, request.getLimiteReprogramaciones());
@@ -85,7 +86,8 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
             psUpdate.setBoolean(3, request.getCorreoDocente());
             psUpdate.setBoolean(4, request.getCorreoAlumno());
             psUpdate.setBoolean(5, request.getCorreoDOA());
-            psUpdate.setBoolean(6, request.getCorreoCoordinador());
+            psUpdate.setBoolean(6, request.getCorreoCoordinadorPrograma());
+            psUpdate.setBoolean(7, request.getCorreoCoordinadorAmbiente());
             psUpdate.executeUpdate();
 
             response.setEstado("Success");

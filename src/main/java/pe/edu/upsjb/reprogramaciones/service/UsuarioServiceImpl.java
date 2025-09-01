@@ -22,6 +22,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     private UsuarioDao usuarioDao;
 
 
+    public ListaUsuarioResponse loginConsultarUsuario(UsuarioRequest request) {
+        return usuarioDao.loginConsultarUsuario(request);
+    }
     public ListaUsuarioResponse consultarUsuario(UsuarioRequest request) {
         return usuarioDao.consultarUsuario(request);
     }
