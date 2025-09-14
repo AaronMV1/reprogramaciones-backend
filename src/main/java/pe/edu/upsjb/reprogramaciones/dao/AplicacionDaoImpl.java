@@ -38,7 +38,7 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
             Connection con = getConnection();
 
             PreparedStatement psSelect = con.prepareStatement(
-            "SELECT * FROM reprogramaciones.configuracion "
+            "SELECT * FROM IDO_REPROGRAMACION_CLASES.CONFIGURACION "
             );
 
             ResultSet rs = psSelect.executeQuery();
@@ -47,11 +47,11 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
                 AplicacionResponse dto = new AplicacionResponse();
                 dto.setLimiteReprogramaciones(rs.getInt("limite"));
                 dto.setPlazoMaximo(rs.getInt("plazo"));
-                dto.setCorreoDocente(rs.getBoolean("cdocente"));
-                dto.setCorreoAlumno(rs.getBoolean("calumno"));
-                dto.setCorreoDOA(rs.getBoolean("cdoa"));
-                dto.setCorreoCoordinadorPrograma(rs.getBoolean("ccoordinador_programa"));
-                dto.setCorreoCoordinadorAmbiente(rs.getBoolean("ccoordinador_ambiente"));
+                dto.setCorreoDocente("Y".equalsIgnoreCase(rs.getString("cdocente")));
+                dto.setCorreoAlumno("Y".equalsIgnoreCase(rs.getString("calumno")));
+                dto.setCorreoDOA("Y".equalsIgnoreCase(rs.getString("cdoa")));
+                dto.setCorreoCoordinadorPrograma("Y".equalsIgnoreCase(rs.getString("ccoordinador_programa")));
+                dto.setCorreoCoordinadorAmbiente("Y".equalsIgnoreCase(rs.getString("ccoordinador_ambiente")));
                 response.getLista().add(dto);
             }
 
@@ -77,21 +77,23 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
             Connection con = getConnection();
 
             PreparedStatement psUpdate = con.prepareStatement(
-                    " UPDATE reprogramaciones.configuracion " +
-                            " SET limite = ?, plazo = ?, cdocente = ?, calumno = ?, cdoa = ?, ccoordinador_programa = ?, ccoordinador_ambiente = ? "
+                    "UPDATE IDO_REPROGRAMACION_CLASES.CONFIGURACION " +
+                            " SET limite = ?, plazo = ?, cdocente = ?, calumno = ?, cdoa = ?, " +
+                            " ccoordinador_programa = ?, ccoordinador_ambiente = ? "
             );
 
             psUpdate.setInt(1, request.getLimiteReprogramaciones());
             psUpdate.setInt(2, request.getPlazoMaximo());
-            psUpdate.setBoolean(3, request.getCorreoDocente());
-            psUpdate.setBoolean(4, request.getCorreoAlumno());
-            psUpdate.setBoolean(5, request.getCorreoDOA());
-            psUpdate.setBoolean(6, request.getCorreoCoordinadorPrograma());
-            psUpdate.setBoolean(7, request.getCorreoCoordinadorAmbiente());
+            psUpdate.setString(3, request.getCorreoDocente() ? "Y" : "N");
+            psUpdate.setString(4, request.getCorreoAlumno() ? "Y" : "N");
+            psUpdate.setString(5, request.getCorreoDOA() ? "Y" : "N");
+            psUpdate.setString(6, request.getCorreoCoordinadorPrograma() ? "Y" : "N");
+            psUpdate.setString(7, request.getCorreoCoordinadorAmbiente() ? "Y" : "N");
+
             psUpdate.executeUpdate();
 
             response.setEstado("Success");
-            response.setMensaje("La configuracion se ha actualizada correctamente");
+            response.setMensaje("La configuración se ha actualizado correctamente");
 
             psUpdate.close();
             con.close();
@@ -105,7 +107,6 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
         return response;
 
     }
-
 
 }
 

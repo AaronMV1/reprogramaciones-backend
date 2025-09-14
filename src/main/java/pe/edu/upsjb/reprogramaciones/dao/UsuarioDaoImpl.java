@@ -39,8 +39,8 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
 
             PreparedStatement psSelect = con.prepareStatement(
                     " SELECT nombres, apellidos, correo, perfil, programa, activo, usuario_responsable " +
-                            " FROM reprogramaciones.usuario " +
-                            " WHERE LOWER(correo) = LOWER(?) AND activo = true"
+                            " FROM IDO_REPROGRAMACION_CLASES.USUARIO " +
+                            " WHERE LOWER(correo) = LOWER(?) AND activo = 'Y'"
             );
 
             psSelect.setString(1, request.getCorreo());
@@ -53,7 +53,7 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
                 dto.setCorreo(rs.getString("correo"));
                 dto.setPerfil(rs.getString("perfil"));
                 dto.setPrograma(rs.getString("programa"));
-                dto.setActivo(rs.getBoolean("activo"));
+                dto.setActivo("Y".equalsIgnoreCase(rs.getString("activo"))); // conversión manual
                 dto.setUsuarioResponsable(rs.getString("usuario_responsable"));
                 response.getLista().add(dto);
             }
@@ -62,7 +62,6 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
             rs.close();
 
             con.close();
-
 
         } catch (SQLException e) {
 
@@ -84,8 +83,8 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
 
             PreparedStatement psSelect = con.prepareStatement(
              " SELECT nombres, apellidos, correo, perfil, programa, activo, usuario_responsable " +
-                 " FROM reprogramaciones.usuario " +
-                 " WHERE LOWER(correo) = LOWER(?) AND activo = true"
+                     " FROM IDO_REPROGRAMACION_CLASES.USUARIO " +
+                     " WHERE LOWER(correo) = LOWER(?) AND activo = 'Y'"
             );
 
             psSelect.setString(1, request.getCorreo());
@@ -98,7 +97,7 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
                 dto.setCorreo(rs.getString("correo"));
                 dto.setPerfil(rs.getString("perfil"));
                 dto.setPrograma(rs.getString("programa"));
-                dto.setActivo(rs.getBoolean("activo"));
+                dto.setActivo("Y".equalsIgnoreCase(rs.getString("activo")));
                 dto.setUsuarioResponsable(rs.getString("usuario_responsable"));
                 response.getLista().add(dto);
             }
@@ -128,9 +127,9 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
             Connection con = getConnection();
 
             PreparedStatement psSelect = con.prepareStatement(
-            " SELECT nombres, apellidos, correo, perfil, programa, activo, usuario_responsable " +
-                " FROM reprogramaciones.usuario " +
-                " WHERE activo = true "
+                    " SELECT nombres, apellidos, correo, perfil, programa, activo, usuario_responsable " +
+                            " FROM IDO_REPROGRAMACION_CLASES.USUARIO " +
+                            " WHERE activo = 'Y'"
             );
 
             ResultSet rs = psSelect.executeQuery();
@@ -142,7 +141,7 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
                 dto.setCorreo(rs.getString("correo"));
                 dto.setPerfil(rs.getString("perfil"));
                 dto.setPrograma(rs.getString("programa"));
-                dto.setActivo(rs.getBoolean("activo"));
+                dto.setActivo("Y".equalsIgnoreCase(rs.getString("activo"))); // conversión manual
                 dto.setUsuarioResponsable(rs.getString("usuario_responsable"));
                 response.getLista().add(dto);
             }
@@ -162,83 +161,76 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
 
     }
 
+
     public MensajeResponse registrarUsuario(UsuarioRequest request) {
 
         MensajeResponse response = new MensajeResponse();
 
-        try {
+        try (Connection con = getConnection()) {
 
-            Connection con = getConnection();
+            // Verificar si ya existe
 
             PreparedStatement psSelect = con.prepareStatement(
-                    "SELECT COUNT(*) FROM reprogramaciones.usuario WHERE LOWER(correo) = LOWER(?)"
+                    "SELECT COUNT(*) FROM IDO_REPROGRAMACION_CLASES.USUARIO WHERE LOWER(correo) = LOWER(?)"
             );
-
             psSelect.setString(1, request.getCorreo());
             ResultSet rs = psSelect.executeQuery();
 
             int count = 0;
 
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
+            if (rs.next()) count = rs.getInt(1);
 
             psSelect.close();
             rs.close();
 
             if (count > 0) {
 
-                PreparedStatement psSelectActivo = con.prepareStatement(
-                        "SELECT activo FROM reprogramaciones.usuario WHERE LOWER(correo) = LOWER(?)"
-                );
+                // Verificar si está activo
 
+                PreparedStatement psSelectActivo = con.prepareStatement(
+                        "SELECT activo FROM IDO_REPROGRAMACION_CLASES.USUARIO WHERE LOWER(correo) = LOWER(?)"
+                );
                 psSelectActivo.setString(1, request.getCorreo());
                 ResultSet rsActivo = psSelectActivo.executeQuery();
 
-                Boolean activo;
-
                 if (rsActivo.next()) {
+                    String activo = rsActivo.getString(1); // 'Y' o 'N'
 
-                    activo = rsActivo.getBoolean(1);
-
-                    System.out.println("activo es: " + activo);
-
-                    if (activo) {
-
+                    if ("Y".equalsIgnoreCase(activo)) {
                         response.setEstado("Alert");
                         response.setMensaje("El usuario ya existe");
-
                     } else {
-
-                        PreparedStatement psInsert = con.prepareStatement(
-                                " UPDATE reprogramaciones.usuario " +
-                                        " SET nombres = ?, apellidos = ?, perfil = ?, programa = ?, activo = ? " +
-                                        " WHERE LOWER(correo) = LOWER(?)"
+                        // Reactivar usuario
+                        PreparedStatement psUpdate = con.prepareStatement(
+                                "UPDATE IDO_REPROGRAMACION_CLASES.USUARIO " +
+                                        "SET nombres = ?, apellidos = ?, perfil = ?, programa = ?, activo = 'Y' " +
+                                        "WHERE LOWER(correo) = LOWER(?)"
                         );
 
-                        psInsert.setString(1, request.getNombres());
-                        psInsert.setString(2, request.getApellidos());
-                        psInsert.setString(6, request.getCorreo());
-                        psInsert.setString(3, request.getPerfil());
-                        psInsert.setString(4, request.getPrograma());
-                        psInsert.setBoolean(5, true);
-
-                        psInsert.executeUpdate();
-                        psInsert.close();
+                        psUpdate.setString(1, request.getNombres());
+                        psUpdate.setString(2, request.getApellidos());
+                        psUpdate.setString(3, request.getPerfil());
+                        psUpdate.setString(4, request.getPrograma());
+                        psUpdate.setString(5, request.getCorreo());
+                        psUpdate.executeUpdate();
+                        psUpdate.close();
 
                         response.setEstado("Success2");
-                        response.setMensaje("El usuario nuevamente agregado");
-
+                        response.setMensaje("El usuario fue reactivado");
                     }
-
                 }
+
+                psSelectActivo.close();
+                rsActivo.close();
 
             } else {
 
+                // Insertar nuevo
+
                 PreparedStatement psInsert = con.prepareStatement(
-                    " INSERT INTO reprogramaciones.usuario " +
-                        " (nombres, apellidos, correo, perfil, programa, activo, usuario_responsable) " +
-                        " VALUES (?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO IDO_REPROGRAMACION_CLASES.USUARIO " +
+                                "(nombres, apellidos, correo, perfil, programa, activo, usuario_responsable) " +
+                                "VALUES (?, ?, ?, ?, ?, 'Y', ?)"
                 );
 
                 psInsert.setString(1, request.getNombres());
@@ -246,138 +238,115 @@ public class UsuarioDaoImpl extends Dao implements UsuarioDao {
                 psInsert.setString(3, request.getCorreo());
                 psInsert.setString(4, request.getPerfil());
                 psInsert.setString(5, request.getPrograma());
-                psInsert.setBoolean(6, true);
-                psInsert.setString(7, request.getUsuarioResponsable());
+                psInsert.setString(6, request.getUsuarioResponsable());
                 psInsert.executeUpdate();
-
                 psInsert.close();
 
                 response.setEstado("Success");
-                response.setMensaje("Usuario Agregado!");
+                response.setMensaje("Usuario agregado!");
 
             }
 
-            con.close();
-
         } catch (SQLException e) {
-
             throw new RuntimeException(e);
-
         }
 
         return response;
-
     }
     public MensajeResponse actualizarUsuario(UsuarioRequest request) {
 
         MensajeResponse response = new MensajeResponse();
 
-        try {
-
-            Connection con = getConnection();
-
+        try (Connection con = getConnection()) {
             PreparedStatement psSelect = con.prepareStatement(
-                    "SELECT COUNT(*) FROM reprogramaciones.usuario WHERE LOWER(correo) = LOWER(?) AND activo = true"
+                    "SELECT COUNT(*) FROM IDO_REPROGRAMACION_CLASES.USUARIO " +
+                            "WHERE LOWER(correo) = LOWER(?) AND activo = 'Y'"
             );
-
             psSelect.setString(1, request.getCorreo());
             ResultSet rs = psSelect.executeQuery();
 
             int count = 0;
-
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
+            if (rs.next()) count = rs.getInt(1);
 
             psSelect.close();
             rs.close();
 
             if (count > 0) {
-
                 PreparedStatement psUpdate = con.prepareStatement(
-                        " UPDATE reprogramaciones.usuario " +
-                                " SET nombres = ?, apellidos = ?, perfil = ?, programa = ? " +
-                                " WHERE LOWER(correo) = LOWER(?)"
+                        "UPDATE IDO_REPROGRAMACION_CLASES.USUARIO " +
+                                "SET nombres = ?, apellidos = ?, perfil = ?, programa = ? " +
+                                "WHERE LOWER(correo) = LOWER(?)"
                 );
 
                 psUpdate.setString(1, request.getNombres());
                 psUpdate.setString(2, request.getApellidos());
-                psUpdate.setString(5, request.getCorreo());
                 psUpdate.setString(3, request.getPerfil());
                 psUpdate.setString(4, request.getPrograma());
+                psUpdate.setString(5, request.getCorreo());
                 psUpdate.executeUpdate();
-
                 psUpdate.close();
 
                 response.setEstado("Success");
-                response.setMensaje("Usuario Actualizado!");
-
+                response.setMensaje("Usuario actualizado!");
             } else {
-
                 response.setEstado("Error");
-                response.setMensaje("El usuario no existe");
-
+                response.setMensaje("El usuario no existe o está inactivo");
             }
 
         } catch (SQLException e) {
-
             throw new RuntimeException(e);
-
         }
 
         return response;
-
     }
     public MensajeResponse eliminarUsuario(UsuarioRequest request) {
 
+
         MensajeResponse response = new MensajeResponse();
 
-        try {
 
-            Connection con = getConnection();
+        try (
+
+            Connection con = getConnection()) {
 
             PreparedStatement psSelect = con.prepareStatement(
-                    "SELECT COUNT(*) FROM reprogramaciones.usuario WHERE LOWER(correo) = LOWER(?) AND activo = true"
+                    "SELECT COUNT(*) FROM IDO_REPROGRAMACION_CLASES.USUARIO " +
+                            "WHERE LOWER(correo) = LOWER(?) AND activo = 'Y'"
             );
 
             psSelect.setString(1, request.getCorreo());
             ResultSet rs = psSelect.executeQuery();
 
+
             int count = 0;
 
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
+
+            if (rs.next()) count = rs.getInt(1);
+
 
             psSelect.close();
             rs.close();
 
+
             if (count > 0) {
 
-                PreparedStatement psInsert = con.prepareStatement(
-                        " UPDATE reprogramaciones.usuario " +
-                                " SET activo = false " +
-                                " WHERE LOWER(correo) = LOWER(?)"
+                PreparedStatement psUpdate = con.prepareStatement(
+                        "UPDATE IDO_REPROGRAMACION_CLASES.USUARIO " +
+                                "SET activo = 'N' WHERE LOWER(correo) = LOWER(?)"
                 );
-
-                psInsert.setString(1, request.getCorreo());
-                psInsert.executeUpdate();
-
-                psInsert.close();
+                psUpdate.setString(1, request.getCorreo());
+                psUpdate.executeUpdate();
+                psUpdate.close();
 
                 response.setEstado("Success");
-                response.setMensaje("Usuario Eliminado!");
+                response.setMensaje("Usuario eliminado!");
 
             } else {
 
                 response.setEstado("Error");
-                response.setMensaje("El usuario no existe");
+                response.setMensaje("El usuario no existe o ya está inactivo");
 
             }
-
-
-
-            con.close();
 
         } catch (SQLException e) {
 
