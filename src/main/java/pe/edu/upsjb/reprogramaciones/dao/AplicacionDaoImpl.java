@@ -108,5 +108,103 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
 
     }
 
+    public ListaSemestreResponse consultarConfiguracionSemestre() {
+
+        ListaSemestreResponse response = new ListaSemestreResponse();
+        response.setLista(new ArrayList<>());
+
+        try {
+
+            Connection con = getConnection();
+
+            PreparedStatement psSelect = con.prepareStatement(
+                    "SELECT * FROM IDO_REPROGRAMACION_CLASES.SEMESTRE "
+            );
+
+            ResultSet rs = psSelect.executeQuery();
+
+            while (rs.next()) {
+                SemestreResponse dto = new SemestreResponse();
+                dto.setGrado(rs.getString("grado"));
+                dto.setCodigoGrado(rs.getString("cod_grado"));
+                dto.setSemestre(rs.getString("semestre"));
+                dto.setCodigoSemestre(rs.getString("cod_semestre"));
+                dto.setFechaInicio(rs.getDate("fecha_inicio"));
+                dto.setFechaCierre(rs.getDate("fecha_cierre"));
+                dto.setFechaCreacion(rs.getDate("fecha_creacion"));
+                dto.setUsuarioCreacion(rs.getString("usuario_creacion"));
+                dto.setFechaModificacion(rs.getDate("fecha_modificacion"));
+                dto.setUsuarioModificacion(rs.getString("usuario_modificacion"));
+                response.getLista().add(dto);
+            }
+
+            psSelect.close();
+            con.close();
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(e);
+
+        }
+
+        return response;
+
+    }
+
+    public MensajeResponse actualizarConfiguracionSemestre(SemestreRequest request) {
+
+        MensajeResponse response = new MensajeResponse();
+
+        try {
+
+            Connection con = getConnection();
+
+            PreparedStatement psUpdate = con.prepareStatement(
+                    "UPDATE IDO_REPROGRAMACION_CLASES.SEMESTRE " +
+                            " SET semestre = ?, cod_semestre = ?, fecha_inicio = ?, fecha_cierre = ?, " +
+                            " fecha_modificacion = SYSDATE, usuario_modificacion = ? " +
+                            " WHERE grado = ? "
+            );
+
+            psUpdate.setString(1, request.getSemestre());
+            psUpdate.setString(2, request.getCodigoSemestre());
+
+            System.out.println(request.getFechaInicio());
+            System.out.println(request.getFechaCierre());
+
+            if (request.getFechaInicio() != null) {
+                psUpdate.setDate(3, new java.sql.Date(request.getFechaInicio().getTime()));
+            } else {
+                psUpdate.setNull(3, java.sql.Types.DATE);
+            }
+
+            if (request.getFechaCierre() != null) {
+                psUpdate.setDate(4, new java.sql.Date(request.getFechaCierre().getTime()));
+            } else {
+                psUpdate.setNull(4, java.sql.Types.DATE);
+            }
+
+            psUpdate.setString(5, request.getUsuarioModificacion());
+
+            psUpdate.setString(6, request.getGrado());
+
+            psUpdate.executeUpdate();
+
+            response.setEstado("Success");
+            response.setMensaje("El semestre se ha actualizado correctamente");
+
+            psUpdate.close();
+            con.close();
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(e);
+
+        }
+
+        return response;
+
+    }
+
 }
 

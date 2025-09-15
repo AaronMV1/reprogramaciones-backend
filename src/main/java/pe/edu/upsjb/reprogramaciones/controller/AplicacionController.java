@@ -34,6 +34,16 @@ public class AplicacionController {
         return aplicacionService.actualizarConfiguracion(request);
     }
 
+    @GetMapping (value = "/consultar-configuracion-semestre")
+    public @ResponseBody ListaSemestreResponse consultarConfiguracionSemestre () {
+        return aplicacionService.consultarConfiguracionSemestre();
+    }
+
+    @PostMapping (value = "/actualizar-configuracion-semestre")
+    public @ResponseBody MensajeResponse actualizarConfiguracionSemestre (@RequestBody SemestreRequest request) {
+        return aplicacionService.actualizarConfiguracionSemestre(request);
+    }
+
 
 }
 

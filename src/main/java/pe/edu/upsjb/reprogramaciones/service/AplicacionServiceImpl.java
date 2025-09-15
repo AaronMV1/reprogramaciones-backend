@@ -26,6 +26,12 @@ public class AplicacionServiceImpl implements AplicacionService {
         return aplicacionDao.consultarConfiguracion();
     }
     public MensajeResponse actualizarConfiguracion(AplicacionRequest request) { return aplicacionDao.actualizarConfiguracion(request); }
+    public ListaSemestreResponse consultarConfiguracionSemestre() {
+        return aplicacionDao.consultarConfiguracionSemestre();
+    }
+    public MensajeResponse actualizarConfiguracionSemestre(SemestreRequest request) {
+        return aplicacionDao.actualizarConfiguracionSemestre(request);
+    }
 
 
 }
