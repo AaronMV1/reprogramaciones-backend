@@ -47,6 +47,7 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
                 AplicacionResponse dto = new AplicacionResponse();
                 dto.setLimiteReprogramaciones(rs.getInt("limite"));
                 dto.setPlazoMaximo(rs.getInt("plazo"));
+                dto.setAnticipacionMinima(rs.getInt("anticipacion"));
                 dto.setCorreoDocente("Y".equalsIgnoreCase(rs.getString("cdocente")));
                 dto.setCorreoAlumno("Y".equalsIgnoreCase(rs.getString("calumno")));
                 dto.setCorreoDOA("Y".equalsIgnoreCase(rs.getString("cdoa")));
@@ -78,17 +79,18 @@ public class AplicacionDaoImpl extends Dao implements AplicacionDao {
 
             PreparedStatement psUpdate = con.prepareStatement(
                     "UPDATE IDO_REPROGRAMACION_CLASES.CONFIGURACION " +
-                            " SET limite = ?, plazo = ?, cdocente = ?, calumno = ?, cdoa = ?, " +
+                            " SET limite = ?, plazo = ?, anticipacion = ?, cdocente = ?, calumno = ?, cdoa = ?, " +
                             " ccoordinador_programa = ?, ccoordinador_ambiente = ? "
             );
 
             psUpdate.setInt(1, request.getLimiteReprogramaciones());
             psUpdate.setInt(2, request.getPlazoMaximo());
-            psUpdate.setString(3, request.getCorreoDocente() ? "Y" : "N");
-            psUpdate.setString(4, request.getCorreoAlumno() ? "Y" : "N");
-            psUpdate.setString(5, request.getCorreoDOA() ? "Y" : "N");
-            psUpdate.setString(6, request.getCorreoCoordinadorPrograma() ? "Y" : "N");
-            psUpdate.setString(7, request.getCorreoCoordinadorAmbiente() ? "Y" : "N");
+            psUpdate.setInt(3, request.getAnticipacionMinima());
+            psUpdate.setString(4, request.getCorreoDocente() ? "Y" : "N");
+            psUpdate.setString(5, request.getCorreoAlumno() ? "Y" : "N");
+            psUpdate.setString(6, request.getCorreoDOA() ? "Y" : "N");
+            psUpdate.setString(7, request.getCorreoCoordinadorPrograma() ? "Y" : "N");
+            psUpdate.setString(8, request.getCorreoCoordinadorAmbiente() ? "Y" : "N");
 
             psUpdate.executeUpdate();
 

@@ -8,6 +8,7 @@ public class AplicacionRequest {
 
     private int limiteReprogramaciones;
     private int plazoMaximo;
+    private int anticipacionMinima;
     private Boolean correoDocente;
     private Boolean correoAlumno;
     private Boolean correoDOA;
@@ -30,6 +31,14 @@ public class AplicacionRequest {
 
     public void setPlazoMaximo(int plazoMaximo) {
         this.plazoMaximo = plazoMaximo;
+    }
+
+    public int getAnticipacionMinima() {
+        return anticipacionMinima;
+    }
+
+    public void setAnticipacionMinima(int anticipacionMinima) {
+        this.anticipacionMinima = anticipacionMinima;
     }
 
     public Boolean getCorreoDocente() {
